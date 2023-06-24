@@ -423,7 +423,8 @@ export class DependenciesScanner {
   }
 
   private isProvider(provider: any): boolean {
-    return this.isInjectable(provider) || this.isCustomProvider(provider);
+    return this.isInjectable(provider) || this.isCustomProvider(provider)
+    || !this.isController(provider); // temporary workaround
   }
 
   public insertProvider(provider: Provider, token: string) {
