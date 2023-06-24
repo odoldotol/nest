@@ -18,6 +18,10 @@ import { ModuleOverride } from '../interfaces/module-override.interface';
 import { MetadataScanner } from '../metadata-scanner';
 import { DependenciesScanner } from '../scanner';
 import Sinon = require('sinon');
+import {
+  InvalidControllerException,
+  InvalidProviderException,
+} from '../errors/exceptions';
 
 describe('DependenciesScanner', () => {
   class Guard {}
@@ -104,6 +108,36 @@ describe('DependenciesScanner', () => {
     const expectation = mockContainer.expects('addController').twice();
     await scanner.scan(TestModule as any);
     expectation.verify();
+  });
+
+  @Module({
+    providers: [TestController],
+  })
+  class TestModuleWithControllerInProviders {}
+
+  @Module({
+    controllers: [TestComponent],
+  })
+  class TestModuleWithInjectableInControllers {}
+
+  it('should be Provider in providers', async () => {
+    let error;
+    try {
+      await scanner.scan(TestModuleWithControllerInProviders);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.be.instanceOf(InvalidProviderException);
+  });
+
+  it('should be Controller in controllers', async () => {
+    let error;
+    try {
+      await scanner.scan(TestModuleWithInjectableInControllers);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.be.instanceOf(InvalidControllerException);
   });
 
   it('should "insertExportedProvider" call once (1 component) container method "addExportedProvider"', async () => {
@@ -448,7 +482,7 @@ describe('DependenciesScanner', () => {
 
     describe('when provider is not custom', () => {
       it('should call container "addProvider" with expected args', () => {
-        const provider = {};
+        const provider = { provide: token };
         const expectation = mockContainer
           .expects('addProvider')
           .withArgs(provider, token);

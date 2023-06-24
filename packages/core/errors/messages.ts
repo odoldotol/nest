@@ -141,6 +141,26 @@ Scope [${stringifyScope(scope)}]
 `;
 };
 
+export const USING_INVALID_CLASS_AS_A_CONTROLLER_MESSAGE = (
+  metatypeUsedAsAController: Type,
+) => {
+  const metatypeNameQuote =
+    `"${getInstanceName(metatypeUsedAsAController)}"` || 'that class';
+
+  return `Classes not annotated with @Controller() decorator cannot be registered as controllers.
+Please refactor ${metatypeNameQuote} to meet this requirement.`;
+};
+
+export const USING_INVALID_OBJECT_AS_A_PROVIDER_MESSAGE = (
+  objectUsedAsAProvider: any,
+) => {
+  const metatypeNameQuote =
+    `"${getInstanceName(objectUsedAsAProvider)}"` || 'that object';
+
+  return `Classes not annotated with @Injectable() decorator or Objects that are not 'Custom Provider' cannot be registered as providers.
+Please refactor ${metatypeNameQuote} to meet this requirement.`;
+};
+
 export const UNDEFINED_MODULE_MESSAGE = (
   parentModule: any,
   index: number,

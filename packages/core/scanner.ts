@@ -55,6 +55,10 @@ import { UuidFactory } from './inspector/uuid-factory';
 import { ModuleDefinition } from './interfaces/module-definition.interface';
 import { ModuleOverride } from './interfaces/module-override.interface';
 import { MetadataScanner } from './metadata-scanner';
+import {
+  InvalidControllerException,
+  InvalidProviderException,
+} from './errors/exceptions';
 
 interface ApplicationProviderWrapper {
   moduleKey: string;
@@ -418,7 +422,13 @@ export class DependenciesScanner {
     return provider && !isNil((provider as any).provide);
   }
 
+  private isProvider(provider: any): boolean {
+    return this.isInjectable(provider) || this.isCustomProvider(provider);
+  }
+
   public insertProvider(provider: Provider, token: string) {
+    if (!this.isProvider(provider))
+      throw new InvalidProviderException(provider);
     const isCustomProvider = this.isCustomProvider(provider);
     if (!isCustomProvider) {
       return this.container.addProvider(provider as Type<any>, token);
@@ -516,6 +526,8 @@ export class DependenciesScanner {
   }
 
   public insertController(controller: Type<Controller>, token: string) {
+    if (!this.isController(controller))
+      throw new InvalidControllerException(controller);
     this.container.addController(controller, token);
   }
 
